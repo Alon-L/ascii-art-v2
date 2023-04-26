@@ -4,8 +4,8 @@ function range(start: number, end: number): number[] {
 }
 
 // TODO: CHANGE THIS TO BE GLOBAL
-const BLOCK_WIDTH = 8;
-const BLOCK_HEIGHT = 16;
+const BLOCK_WIDTH = 6;
+const BLOCK_HEIGHT = 12;
 
 // Utility class to generate the mapping of the light levels for every character
 export class Generate {

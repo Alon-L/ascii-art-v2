@@ -3,8 +3,8 @@ precision highp float;
 uniform sampler2D lightsTex;
 uniform vec2 lightsDims;
 
-#define BLOCK_WIDTH 8
-#define BLOCK_HEIGHT 16
+#define BLOCK_WIDTH 6
+#define BLOCK_HEIGHT 12
 #define CHAR_NUM 114
 
 // Acts as a 2D array: one row for every character

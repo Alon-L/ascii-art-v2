@@ -11,8 +11,8 @@ const calc = new CalcProgram({
     width: window.innerWidth,
     height: window.innerHeight,
     block: {
-        width: 8,
-        height: 16,
+        width: 6,
+        height: 12,
     }
 });
 
@@ -67,7 +67,7 @@ async function extractFramesFromVideo(fps = 25): Promise<number[][]> {
             calc.draw();
 
 
-            let str = String.fromCharCode(...calc.results).replace(/(.{240})/g, '$1\n');
+            let str = String.fromCharCode(...calc.results).replace(/(.{320})/g, '$1\n');
 
 
             (document.querySelector('#result')! as HTMLSpanElement).innerText = str;
@@ -77,6 +77,10 @@ async function extractFramesFromVideo(fps = 25): Promise<number[][]> {
         resolve(frames);
     });
 }
+
+const lightMap = new Generate().generate();
+
+console.log(JSON.stringify(lightMap));
 
 
 
@@ -136,7 +140,6 @@ img.addEventListener('load', () => {
 });
 
 
-const lightMap = new Generate().generate();
 
-console.log(JSON.stringify(lightMap));
 */
+
