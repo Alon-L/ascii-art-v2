@@ -73,14 +73,12 @@ async function extractFramesFromVideo(fps = 30) {
     }
 }
 
+extractFramesFromVideo();
+
 const lightMap = new Generate().generate();
 
 console.log(JSON.stringify(lightMap));
 
-
-
-const frames = await extractFramesFromVideo();
-console.log(frames);
 /*
 
 const img = new Image();
