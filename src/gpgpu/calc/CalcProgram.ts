@@ -39,25 +39,11 @@ export class CalcProgram extends Program {
         const width = settings.block.width * settings.block.height + 1;
         const height = settings.chars.length;
 
-        this.createTexture(new Uint8Array(charLights), width, height, 1, this.charLightsLoc, this.charLightsDimsLoc);
+        this.createTexture(new Uint8Array(charLights), width, height, 1, this.charLightsLoc, this.charLightsDimsLoc, this.gl.LUMINANCE);
     }
 
     // Creates a texture from the light values of the pixels
     private createLightsTexture(): void {
-        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.lightsTexLoc, this.lightsDimsLoc);
+        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.lightsTexLoc, this.lightsDimsLoc, this.gl.LUMINANCE);
     }
-
-    // Returns the ASCII values that should be placed in every block
-    public get asciis(): number[] {
-        const results = super.results;
-
-        const asciis = [];
-        // The results are stored in the alpha R channel of every pixel in the canvas
-        for (let i = 0; i < this.dstWidth * this.dstHeight; ++i) {
-            asciis.push(results[i * 4]);
-        }
-
-        return asciis;
-    }
-
 }

@@ -14,6 +14,11 @@ export class MonochromeProgram extends Program {
         this.pixelsDimsLoc = this.gl.getUniformLocation(this.program, 'pixelsDims')!;
     }
 
+    public set pixels(pixels: Uint8Array | Uint8ClampedArray) {
+        this.frame.pixels = pixels;
+        this.createPixelsTexture();
+    }
+
     public draw(): void {
         this.createPixelsTexture();
         super.draw();
@@ -21,22 +26,6 @@ export class MonochromeProgram extends Program {
 
     // Creates a texture from the light values of the pixels
     private createPixelsTexture(): void {
-
-        console.log(this.frame.pixels);
-
-        this.createTexture(this.frame.pixels, this.frame.width * 4, this.frame.height, 0, this.pixelsTexLoc, this.pixelsDimsLoc);
-    }
-
-    // Returns the ASCII values that should be placed in every block
-    public get asciis(): number[] {
-        const results = super.results;
-
-        const asciis = [];
-        // The results are stored in the alpha R channel of every pixel in the canvas
-        for (let i = 0; i < this.dstWidth * this.dstHeight; ++i) {
-            asciis.push(results[i * 4]);
-        }
-
-        return asciis;
+        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.pixelsTexLoc, this.pixelsDimsLoc, this.gl.RGBA);
     }
 }

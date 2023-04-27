@@ -1,6 +1,6 @@
 // Represents a frame of the image.
 export type Frame = {
-    pixels: Uint8Array;
+    pixels: Uint8Array | Uint8ClampedArray;
     width: number;
     height: number;
 };
@@ -90,7 +90,7 @@ export class Program {
     }
 
     // Creates a new shader texture from the given source array
-    protected createTexture(src: Uint8Array, width: number, height: number, unit: number, texLoc: WebGLUniformLocation, texDimsLoc: WebGLUniformLocation): void {
+    protected createTexture(src: Uint8Array | Uint8ClampedArray, width: number, height: number, unit: number, texLoc: WebGLUniformLocation, texDimsLoc: WebGLUniformLocation, format: GLint): void {
         const tex = this.gl.createTexture();
         if (!tex) throw new Error('Could not create texture!');
 
@@ -101,11 +101,11 @@ export class Program {
         this.gl.texImage2D(
             this.gl.TEXTURE_2D,
             0,
-            this.gl.LUMINANCE,
+            format,
             width,
             height,
             0,
-            this.gl.LUMINANCE,
+            format,
             this.gl.UNSIGNED_BYTE,
             src,
         );
@@ -153,8 +153,19 @@ export class Program {
         const results = new Uint8Array(this.dstWidth * this.dstHeight * 4);
         this.gl.readPixels(0, 0, this.dstWidth, this.dstHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, results);
 
-        console.log(results);
-
         return results;
+    }
+
+    // Returns the R channels of the results
+    public get reducedResults(): Uint8Array {
+        const results = this.results;
+
+        const reduced = new Uint8Array(this.dstWidth * this.dstHeight);
+        // The results are stored in the alpha R channel of every pixel in the canvas
+        for (let i = 0; i < this.dstWidth * this.dstHeight; ++i) {
+            reduced[i] = results[i * 4];
+        }
+
+        return reduced;
     }
 }

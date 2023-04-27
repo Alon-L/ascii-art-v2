@@ -1,7 +1,14 @@
 import './style.css'
 import {CalcProgram} from "./gpgpu/calc/CalcProgram.ts";
-import videoExample from './boashon.mp4';
+import videoExample from './video_example.mp4';
 import {Generate} from "./charLights/generate.ts";
+import {MonochromeProgram} from "./gpgpu/monochrome/MonochromeProgram.ts";
+
+const mono = new MonochromeProgram({
+    pixels: new Uint8Array(),
+    width: window.innerWidth,
+    height: window.innerHeight,
+});
 
 const calc = new CalcProgram({
     pixels: new Uint8Array(),
@@ -9,66 +16,61 @@ const calc = new CalcProgram({
     height: window.innerHeight,
 });
 
+
 // TODO: Upload video
-async function extractFramesFromVideo(fps = 25): Promise<number[][]> {
-    return new Promise(async (resolve) => {
-        let video = document.createElement("video");
+async function extractFramesFromVideo(fps = 30) {
+    const video = document.createElement("video");
 
-        let seekResolve;
-        video.addEventListener("seeked", async function () {
-            if (seekResolve) seekResolve();
-        });
-
-        video.src = videoExample;
-
-        document.querySelector('#app')!.appendChild(video);
-
-        // workaround chromium metadata bug (https://stackoverflow.com/q/38062864/993683)
-        while (
-            (video.duration === Infinity || isNaN(video.duration)) &&
-            video.readyState < 2
-            ) {
-            await new Promise((r) => setTimeout(r, 1000));
-            video.currentTime = 10000000 * Math.random();
-        }
-        let duration = video.duration;
-
-        let canvas = document.createElement("canvas");
-        let context = canvas.getContext("2d")!;
-        let [w, h] = [window.innerWidth, window.innerHeight];
-        canvas.width = w;
-        canvas.height = h;
-
-        let frames: number[][] = [];
-        let interval = 1 / fps;
-        let currentTime = 0;
-
-        while (currentTime < duration) {
-            video.currentTime = currentTime;
-            await new Promise((r) => (seekResolve = r));
-
-            context.drawImage(video, 0, 0, w, h);
-
-            const frame: number[] = [];
-            const pixels = context.getImageData(0, 0, w, h).data;
-            for (let i = 0; i < pixels.length / 4; ++i) {
-                frame.push((pixels[i * 4] + pixels[i * 4 + 1] + pixels[i * 4 + 2]) / 3);
-            }
-
-            calc.lights = new Uint8Array(frame);
-
-            calc.draw();
-
-
-            let str = String.fromCharCode(...calc.asciis).replace(/(.{320})/g, '$1\n');
-
-
-            (document.querySelector('#result')! as HTMLSpanElement).innerText = str;
-
-            currentTime += interval;
-        }
-        resolve(frames);
+    let seekResolve: (val?: unknown) => void;
+    video.addEventListener("seeked", async function () {
+        if (seekResolve) seekResolve();
     });
+
+    video.src = videoExample;
+
+    document.querySelector('#app')!.appendChild(video);
+
+    // workaround chromium metadata bug (https://stackoverflow.com/q/38062864/993683)
+    while (
+        (video.duration === Infinity || isNaN(video.duration)) &&
+        video.readyState < 2
+        ) {
+        await new Promise((r) => setTimeout(r, 1000));
+        video.currentTime = 10000000 * Math.random();
+    }
+    const duration = video.duration;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    const [w, h] = [window.innerWidth, window.innerHeight];
+    canvas.width = w;
+    canvas.height = h;
+
+    let interval = 1 / fps;
+    let currentTime = 0;
+
+    while (currentTime < duration) {
+        video.currentTime = currentTime;
+        await new Promise((r) => (seekResolve = r));
+
+        ctx.drawImage(video, 0, 0, w, h);
+
+        const pixels = ctx.getImageData(0, 0, w, h).data;
+
+        mono.pixels = pixels;
+
+        mono.draw();
+
+        calc.lights = mono.reducedResults;
+
+        calc.draw();
+
+        const str = String.fromCharCode(...calc.reducedResults).replace(/(.{480})/g, '$1\n');
+
+        (document.querySelector('#result')! as HTMLSpanElement).innerText = str;
+
+        currentTime += interval;
+    }
 }
 
 const lightMap = new Generate().generate();

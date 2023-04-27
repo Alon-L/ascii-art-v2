@@ -9,19 +9,9 @@ uniform vec2 pixelsDims;
 
 void main() {
     // Calculates the grayscale value of the 3 channels
-    vec2 RCoord = vec2((gl_FragCoord.x) * 4.0 + 0.0, (gl_FragCoord.y) + 0.0) / pixelsDims;
-    vec2 GCoord = vec2((gl_FragCoord.x) * 4.0 + 1.0, (gl_FragCoord.y) + 1.0) / pixelsDims;
-    vec2 BCoord = vec2((gl_FragCoord.x) * 4.0 + 2.0, (gl_FragCoord.y) + 2.0) / pixelsDims;
+    vec4 RGBA = texture2D(pixelsTex, gl_FragCoord.xy / pixelsDims);
+    float luminance = RGBA.x * R_CO + RGBA.y * G_CO + RGBA.z * B_CO;
 
-    float R = texture2D(pixelsTex, RCoord).x;
-    float G = texture2D(pixelsTex, GCoord).x;
-    float B = texture2D(pixelsTex, BCoord).x;
 
-    float luminance = R * R_CO + G * G_CO + B * B_CO;
-
-    //gl_FragColor = vec4(luminance, luminance, luminance, 1);
-
-    //gl_FragColor = vec4(1);
-    gl_FragColor = vec4(R, G, B, 1);
-    //gl_FragColor = vec4(pixelsDims / 255.0 / 100.0, 0, 0);
+    gl_FragColor = vec4(luminance);
 }
