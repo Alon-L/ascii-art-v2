@@ -1,11 +1,4 @@
-// Returns an array starting from 'start' and ending at 'end' (exclusive)
-function range(start: number, end: number): number[] {
-    return Array.from(Array(end - start), ((_, i) => i + start));
-}
-
-// TODO: CHANGE THIS TO BE GLOBAL
-const BLOCK_WIDTH = 6;
-const BLOCK_HEIGHT = 12;
+import settings from '../settings.json';
 
 // Utility class to generate the mapping of the light levels for every character
 export class Generate {
@@ -13,13 +6,7 @@ export class Generate {
     private readonly chars: string;
 
     constructor() {
-        this.chars = String.fromCharCode(
-            ...range(0x21, 0x5f), // !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_
-            ...range(0x60, 0x7f), // `abcdefghijklmnopqrstuvwxyz{|}~
-            ...range(0xa1, 0xa8), // ¡¢£¤¥¦§
-            ...range(0xae, 0xb2), // ®¯°±
-            0xa9, 0xab, 0xac, 0xb4, 0xb5, 0xb7, 0xbb, 0xbf, 0xd7, 0xf7, // ©«¬´µ·»¿×÷
-        );
+        this.chars = settings.chars
     }
 
     // Generates a map in the format of the 'charLights' float array, from all the available characters
@@ -47,7 +34,7 @@ export class Generate {
     // Returns the light map of a character.
     private lightMap(char: string): number[] {
         const ctx = this.createCanvas(char);
-        const pixels = ctx.getImageData(0, 0, BLOCK_WIDTH, BLOCK_HEIGHT).data;
+        const pixels = ctx.getImageData(0, 0, settings.block.width, settings.block.height).data;
 
         // Take only the R channel, since the text is monochrome.
         const lights = [];
@@ -62,8 +49,8 @@ export class Generate {
     // The character is written in white, at a size that matches the constant block size.
     private createCanvas(char: string): CanvasRenderingContext2D {
         const canvas = document.createElement('canvas');
-        canvas.width = BLOCK_WIDTH;
-        canvas.height = BLOCK_HEIGHT;
+        canvas.width = settings.block.width;
+        canvas.height = settings.block.height;
 
         const ctx = canvas.getContext('2d');
 
@@ -72,7 +59,7 @@ export class Generate {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.font = `normal ${BLOCK_HEIGHT}px monospace`;
+        ctx.font = `normal ${settings.block.height}px monospace`;
         ctx.fillStyle = 'white';
 
         // Center text horizontally and vertically

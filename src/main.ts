@@ -1,19 +1,12 @@
 import './style.css'
-import {CalcProgram} from "./gpgpu/CalcProgram.ts";
-import dog from './dog.jpg';
-import triangle from './triangle.png';
-import videoExample from './video_example.mp4';
+import {CalcProgram} from "./gpgpu/calc/CalcProgram.ts";
+import videoExample from './boashon.mp4';
 import {Generate} from "./charLights/generate.ts";
 
-
 const calc = new CalcProgram({
-    lights: new Uint8Array(),
+    pixels: new Uint8Array(),
     width: window.innerWidth,
     height: window.innerHeight,
-    block: {
-        width: 6,
-        height: 12,
-    }
 });
 
 // TODO: Upload video
@@ -67,7 +60,7 @@ async function extractFramesFromVideo(fps = 25): Promise<number[][]> {
             calc.draw();
 
 
-            let str = String.fromCharCode(...calc.results).replace(/(.{320})/g, '$1\n');
+            let str = String.fromCharCode(...calc.asciis).replace(/(.{320})/g, '$1\n');
 
 
             (document.querySelector('#result')! as HTMLSpanElement).innerText = str;
