@@ -2,16 +2,13 @@ import {Frame, Program} from "../Program.ts";
 import vs from "./mono.vert";
 import fg from "./mono.frag";
 
-export class MonochromeProgram extends Program {
-    private readonly pixelsTexLoc: WebGLUniformLocation;
-    private readonly pixelsDimsLoc: WebGLUniformLocation;
-
+export class MonochromeProgram extends Program<'pixelsTex' | 'pixelsDims'> {
     constructor(frame: Frame) {
         super(vs, fg, frame, frame.width, frame.height);
 
         // Sets the locations of the uniforms
-        this.pixelsTexLoc = this.gl.getUniformLocation(this.program, 'pixelsTex')!;
-        this.pixelsDimsLoc = this.gl.getUniformLocation(this.program, 'pixelsDims')!;
+        this.addUniformLoc('pixelsTex');
+        this.addUniformLoc('pixelsDims');
     }
 
     public set pixels(pixels: Uint8Array | Uint8ClampedArray) {
@@ -26,6 +23,6 @@ export class MonochromeProgram extends Program {
 
     // Creates a texture from the light values of the pixels
     private createPixelsTexture(): void {
-        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.pixelsTexLoc, this.pixelsDimsLoc, this.gl.RGBA);
+        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.uniformLocations['pixelsTex'], this.uniformLocations['pixelsDims'], this.gl.RGBA);
     }
 }

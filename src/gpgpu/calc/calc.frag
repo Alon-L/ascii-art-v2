@@ -11,7 +11,7 @@ uniform vec2 lightsDims;
 // The first int of every row is the ascii value of the character
 // The other BLOCK_WIDTH * BLOCK_HEIGHT values are the light values of the chararcter
 #define CHAR_LIGHT_ROW (BLOCK_WIDTH * BLOCK_HEIGHT + 1)
-uniform sampler2D charLights;
+uniform sampler2D charLightsTex;
 uniform vec2 charLightsDims;
 
 void main() {
@@ -30,7 +30,7 @@ void main() {
                 vec4 light = texture2D(lightsTex, lightCoord);
 
                 vec2 charLightCoord = vec2(1 + y + x * BLOCK_WIDTH + 1, i + 1) / charLightsDims;
-                vec4 charLight = texture2D(charLights, charLightCoord);
+                vec4 charLight = texture2D(charLightsTex, charLightCoord);
 
                 // Calculate the difference between the corresponding pixel light to the character's light
                 delta += light.x - charLight.x;
@@ -40,12 +40,9 @@ void main() {
         // Compare with the previous checked letters
         if (abs(delta) < abs(bestCharDelta)) {
             bestCharDelta = delta;
-            bestCharASCII = texture2D(charLights, vec2(0, i) / charLightsDims);
-            //bestCharASCII = vec4(i - 1) / 255.0;
+            bestCharASCII = texture2D(charLightsTex, vec2(0, i) / charLightsDims);
         }
     }
 
     gl_FragColor = bestCharASCII;
-    //gl_FragColor = texture2D(lightsTex, vec2(0, 0) / lightsDims);
-    //gl_FragColor = texture2D(charLights, vec2(1, 1) / charLightsDims);
 }

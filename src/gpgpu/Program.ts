@@ -5,8 +5,8 @@ export type Frame = {
     height: number;
 };
 
-// Interface for the WebGL program that calculates the matching character for every block in the frame.
-export class Program {
+// Interface for a WebGL program
+export class Program<T extends string> {
     // String contents of the vertex and fragment shaders
     private readonly vs: string;
     private readonly fg: string;
@@ -17,6 +17,9 @@ export class Program {
     protected program: WebGLProgram;
 
     protected readonly frame: Frame;
+
+    // An object with all the uniform location objects of the program
+    protected readonly uniformLocations: Record<T, WebGLUniformLocation>;
 
     private readonly posLoc: number;
 
@@ -62,6 +65,9 @@ export class Program {
 
         // Sets the position attribute of the shader
         this.posLoc = this.gl.getAttribLocation(this.program, 'position');
+
+        // Initialize the uniform locations object
+        this.uniformLocations = {} as Record<T, WebGLUniformLocation>;
     }
 
     // Sets up the position attribute and draws the canvas
@@ -146,6 +152,14 @@ export class Program {
             0,
             0,
         );
+    }
+
+    // Adds a new uniform location to the uniform locations object
+    protected addUniformLoc(loc: T): void {
+        const location = this.gl.getUniformLocation(this.program, loc);
+        if (!location) throw new Error('Uniform location not found!');
+
+        this.uniformLocations[loc] = location;
     }
 
     // Returns the results of the program shader
