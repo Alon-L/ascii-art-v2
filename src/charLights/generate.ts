@@ -18,14 +18,10 @@ export class Generate {
             const char = this.chars[i];
             const lightMap = this.lightMap(char);
 
-            console.log(char.charCodeAt(0));
-
             // First element should be the ASCII value of the character
             result.push(char.charCodeAt(0));
             // Concat the light map of the current character
             result = result.concat(lightMap);
-
-            console.log(i, char);
         }
 
         return result;

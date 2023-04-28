@@ -1,8 +1,11 @@
 import './style.css'
+import { settings } from './settings/panel.ts';
 import {CalcProgram} from "./gpgpu/calc/CalcProgram.ts";
 import {Generate} from "./charLights/generate.ts";
-import videoExample from './video_example.mp4';
+import videoExample from './NSLComm.mp4';
 import {MonochromeProgram} from "./gpgpu/monochrome/MonochromeProgram.ts";
+import {Video} from "./video.ts";
+import {Readable} from "stream";
 
 const mono = new MonochromeProgram({
     pixels: new Uint8Array(),
@@ -17,6 +20,27 @@ const calc = new CalcProgram({
 });
 
 
+const frames = new Readable({
+    read(size: number) {}
+});
+
+new Video(videoExample, frames, {width: window.innerWidth, height: window.innerHeight, fps: 60});
+
+frames.on('data', (pixels) => {
+    mono.pixels = pixels;
+
+    mono.draw();
+
+    calc.lights = mono.reducedResults;
+
+    calc.draw();
+
+    const str = String.fromCharCode(...calc.reducedResults).replace(/(.{480})/g, '$1\n');
+
+    (document.querySelector('#result')! as HTMLSpanElement).innerText = str;
+});
+
+/*
 // TODO: Upload video
 async function extractFramesFromVideo(fps = 30) {
     const video = document.createElement("video");
@@ -73,11 +97,11 @@ async function extractFramesFromVideo(fps = 30) {
     }
 }
 
-extractFramesFromVideo();
+extractFramesFromVideo();*/
 
 const lightMap = new Generate().generate();
 
-console.log(JSON.stringify(lightMap));
+//console.log(JSON.stringify(lightMap));
 
 /*
 
