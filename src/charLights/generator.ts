@@ -1,12 +1,18 @@
 import settings from '../settings/settings.json';
 
 // Utility class to generate the mapping of the light levels for every character
-export class Generate {
+export class Generator {
     // A string that contains all the available characters for usage
-    private readonly chars: string;
+    public chars: string;
 
-    constructor() {
-        this.chars = settings.chars
+    public width: number;
+    public height: number;
+
+    constructor(chars = settings.chars, width = settings.block.width, height = settings.block.height) {
+        this.chars = chars;
+
+        this.width = width;
+        this.height = height;
     }
 
     // Generates a map in the format of the 'charLights' float array, from all the available characters
@@ -30,7 +36,7 @@ export class Generate {
     // Returns the light map of a character.
     private lightMap(char: string): number[] {
         const ctx = this.createCanvas(char);
-        const pixels = ctx.getImageData(0, 0, settings.block.width, settings.block.height).data;
+        const pixels = ctx.getImageData(0, 0, this.width, this.height).data;
 
         // Take only the R channel, since the text is monochrome.
         const lights = [];
@@ -45,8 +51,8 @@ export class Generate {
     // The character is written in white, at a size that matches the constant block size.
     private createCanvas(char: string): CanvasRenderingContext2D {
         const canvas = document.createElement('canvas');
-        canvas.width = settings.block.width;
-        canvas.height = settings.block.height;
+        canvas.width = this.width;
+        canvas.height = this.height;
 
         const ctx = canvas.getContext('2d');
 
@@ -55,7 +61,7 @@ export class Generate {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.font = `normal ${settings.block.height}px monospace`;
+        ctx.font = `normal ${this.height}px monospace`;
         ctx.fillStyle = 'white';
 
         // Center text horizontally and vertically

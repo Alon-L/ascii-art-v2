@@ -11,10 +11,12 @@ export class Program<T extends string> {
     private readonly vs: string;
     private readonly fg: string;
 
-    // The WebGL context instance
-    protected gl: WebGL2RenderingContext;
+    private readonly canvas: HTMLCanvasElement;
 
-    protected program: WebGLProgram;
+    // The WebGL context instance
+    protected readonly gl: WebGL2RenderingContext;
+
+    protected readonly program: WebGLProgram;
 
     protected readonly frame: Frame;
 
@@ -24,23 +26,22 @@ export class Program<T extends string> {
     private readonly posLoc: number;
 
     // The width and height of the resulting calculations' matrix.
-    protected readonly dstWidth: number;
-    protected readonly dstHeight: number;
+    protected _dstWidth: number;
+    protected _dstHeight: number;
 
     protected constructor(vs: string, fg: string, frame: Frame, dstWidth: number, dstHeight: number, uniformLocs: readonly T[]) {
-        const canvas = document.createElement('canvas');
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = dstWidth;
+        this.canvas.height = dstHeight;
 
-        const gl = canvas.getContext('webgl2');
+        const gl = this.canvas.getContext('webgl2');
         if (!gl) throw new Error('WebGL is not supported on this browser!');
-
-        canvas.width = dstWidth;
-        canvas.height = dstHeight;
 
         this.gl = gl;
         this.vs = vs;
         this.fg = fg;
-        this.dstWidth = dstWidth;
-        this.dstHeight = dstHeight;
+        this._dstWidth = dstWidth;
+        this._dstHeight = dstHeight;
 
         this.frame = frame;
 
@@ -160,6 +161,16 @@ export class Program<T extends string> {
         );
     }
 
+    public set dstWidth(value: number) {
+        this.canvas.width = value;
+        this._dstWidth = value;
+    }
+
+    public set dstHeight(value: number) {
+        this.canvas.height = value;
+        this._dstHeight = value;
+    }
+
     // Adds a new uniform location to the uniform locations object
     protected addUniformLoc(loc: T): void {
         const location = this.gl.getUniformLocation(this.program, loc);
@@ -170,8 +181,8 @@ export class Program<T extends string> {
 
     // Returns the results of the program shader
     public get results(): Uint8Array {
-        const results = new Uint8Array(this.dstWidth * this.dstHeight * 4);
-        this.gl.readPixels(0, 0, this.dstWidth, this.dstHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, results);
+        const results = new Uint8Array(this._dstWidth * this._dstHeight * 4);
+        this.gl.readPixels(0, 0, this._dstWidth, this._dstHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, results);
 
         return results;
     }
@@ -180,9 +191,9 @@ export class Program<T extends string> {
     public get reducedResults(): Uint8Array {
         const results = this.results;
 
-        const reduced = new Uint8Array(this.dstWidth * this.dstHeight);
+        const reduced = new Uint8Array(this._dstWidth * this._dstHeight);
         // The results are stored in the alpha R channel of every pixel in the canvas
-        for (let i = 0; i < this.dstWidth * this.dstHeight; ++i) {
+        for (let i = 0; i < this._dstWidth * this._dstHeight; ++i) {
             reduced[i] = results[i * 4];
         }
 

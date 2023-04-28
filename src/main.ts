@@ -1,44 +1,17 @@
 import './style.css'
-import { settings } from './settings/panel.ts';
-import {CalcProgram} from "./gpgpu/calc/CalcProgram.ts";
-import {Generate} from "./charLights/generate.ts";
-import videoExample from './NSLComm.mp4';
-import {MonochromeProgram} from "./gpgpu/monochrome/MonochromeProgram.ts";
-import {Video} from "./video.ts";
-import {Readable} from "stream";
+import {Generator} from "./charLights/generator.ts";
+import videoExample from './video_example.mp4';
+import {Render} from "./render.ts";
+import {Panel} from "./settings/panel.ts";
 
-const mono = new MonochromeProgram({
-    pixels: new Uint8Array(),
-    width: window.innerWidth,
-    height: window.innerHeight,
-});
+const render = new Render(videoExample, { width: window.innerWidth, height: window.innerHeight, fps: 60 });
+const panel = new Panel(render);
 
-const calc = new CalcProgram({
-    pixels: new Uint8Array(),
-    width: window.innerWidth,
-    height: window.innerHeight,
-});
-
-
-const frames = new Readable({
-    read(size: number) {}
-});
-
-new Video(videoExample, frames, {width: window.innerWidth, height: window.innerHeight, fps: 60});
-
-frames.on('data', (pixels) => {
-    mono.pixels = pixels;
-
-    mono.draw();
-
-    calc.lights = mono.reducedResults;
-
-    calc.draw();
-
-    const str = String.fromCharCode(...calc.reducedResults).replace(/(.{480})/g, '$1\n');
-
-    (document.querySelector('#result')! as HTMLSpanElement).innerText = str;
-});
+/*gui.onChange((event) => {
+    if (event.property === 'contrastCoefficient') {
+        mono.contrastCoefficient = event.value * 255;
+    }
+});*/
 
 /*
 // TODO: Upload video
@@ -99,7 +72,7 @@ async function extractFramesFromVideo(fps = 30) {
 
 extractFramesFromVideo();*/
 
-const lightMap = new Generate().generate();
+const lightMap = new Generator().generate();
 
 //console.log(JSON.stringify(lightMap));
 

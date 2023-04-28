@@ -5,15 +5,15 @@ import settings from '../../settings/settings.json';
 
 const monoProgramUniforms = ['pixelsTex', 'pixelsDims', 'contrastCoefficient'];
 
-export class MonochromeProgram extends Program<typeof monoProgramUniforms[number]> {
+export class MonoProgram extends Program<typeof monoProgramUniforms[number]> {
     constructor(frame: Frame) {
         super(vs, fg, frame, frame.width, frame.height, monoProgramUniforms);
 
-        this.contrastCoefficient = settings.contrastCoefficient * 255;
+        this.contrastCoefficient = settings.contrastCoefficient;
     }
 
     public set contrastCoefficient(value: number) {
-        this.gl.uniform1f(this.uniforms['contrastCoefficient'], value);
+        this.gl.uniform1f(this.uniforms['contrastCoefficient'], value * 255);
     }
 
     public set pixels(pixels: Uint8Array | Uint8ClampedArray) {

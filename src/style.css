@@ -3,7 +3,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  font: normal 6px monospace;
+  font-family: monospace;
   background-color: black;
   color: white;
 }
