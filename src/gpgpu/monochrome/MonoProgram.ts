@@ -28,6 +28,6 @@ export class MonoProgram extends Program<typeof monoProgramUniforms[number]> {
 
     // Creates a texture from the light values of the pixels
     private createPixelsTexture(): void {
-        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.uniforms['pixelsTex'], this.uniforms['pixelsDims'], this.gl.RGBA);
+        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.uniforms.pixelsTex, this.uniforms.pixelsDims, this.gl.RGBA);
     }
 }

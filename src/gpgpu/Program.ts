@@ -74,12 +74,14 @@ export class Program<T extends string> {
 
             acc[loc] = uniform;
             return acc;
-        }, {} as Record<T, WebGLUniformLocation>)
+        }, {} as Record<T, WebGLUniformLocation>);
+
+        // Create the position attribute
+        this.createPositionAttr();
     }
 
     // Sets up the position attribute and draws the canvas
     protected draw(): void {
-        this.createPositionAttr();
         this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
     }
 

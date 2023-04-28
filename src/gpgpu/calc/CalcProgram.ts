@@ -33,6 +33,9 @@ export class CalcProgram extends Program<typeof calcProgramUniforms[number]> {
         this.blockWidth = settings.block.width;
         this.blockHeight = settings.block.height;
         this.charNum = settings.chars.length;
+
+        // Creates the texture from the characters light map
+        this.createCharLightsTexture();
     }
 
     public set blockWidth(value: number) {
@@ -63,7 +66,6 @@ export class CalcProgram extends Program<typeof calcProgramUniforms[number]> {
     // Sets-up all the attributes, uniforms and textures, and draws the canvas
     public draw(): void {
         this.createLightsTexture();
-        this.createCharLightsTexture();
         super.draw();
     }
 
