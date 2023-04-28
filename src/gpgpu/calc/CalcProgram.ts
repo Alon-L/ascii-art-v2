@@ -2,7 +2,7 @@ import {Frame, Program} from '../Program.ts';
 import vs from './calc.vert';
 import fg from './calc.frag';
 import charLights from '../../charLights/map.json';
-import settings from '../../settings.json';
+import settings from '../../settings/settings.json';
 
 const calcProgramUniforms = ['lightsTex'
     , 'lightsDims'
@@ -20,9 +20,21 @@ export class CalcProgram extends Program<typeof calcProgramUniforms[number]> {
         super(vs, fg, frame, dstWidth, dstHeight, calcProgramUniforms);
 
         // Initialize the uniforms
-        this.gl.uniform1i(this.uniforms.blockWidth, settings.block.width);
-        this.gl.uniform1i(this.uniforms.blockHeight, settings.block.height);
-        this.gl.uniform1i(this.uniforms.charNum, settings.chars.length);
+        this.blockWidth = settings.block.width;
+        this.blockHeight = settings.block.height;
+        this.charNum = settings.chars.length;
+    }
+
+    public set blockWidth(value: number) {
+        this.gl.uniform1i(this.uniforms.blockWidth, value);
+    }
+
+    public set blockHeight(value: number) {
+        this.gl.uniform1i(this.uniforms.blockHeight, value);
+    }
+
+    public set charNum(value: number) {
+        this.gl.uniform1i(this.uniforms.charNum, value);
     }
 
     // Sets-up all the attributes, uniforms and textures, and draws the canvas

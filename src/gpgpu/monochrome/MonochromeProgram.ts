@@ -1,7 +1,7 @@
 import {Frame, Program} from "../Program.ts";
 import vs from "./mono.vert";
 import fg from "./mono.frag";
-import settings from '../../settings.json';
+import settings from '../../settings/settings.json';
 
 const monoProgramUniforms = ['pixelsTex', 'pixelsDims', 'contrastCoefficient'];
 
@@ -9,7 +9,11 @@ export class MonochromeProgram extends Program<typeof monoProgramUniforms[number
     constructor(frame: Frame) {
         super(vs, fg, frame, frame.width, frame.height, monoProgramUniforms);
 
-        this.gl.uniform1f(this.uniforms['contrastCoefficient'], settings.contrastCoefficient);
+        this.contrastCoefficient = settings.contrastCoefficient * 255;
+    }
+
+    public set contrastCoefficient(value: number) {
+        this.gl.uniform1f(this.uniforms['contrastCoefficient'], value);
     }
 
     public set pixels(pixels: Uint8Array | Uint8ClampedArray) {

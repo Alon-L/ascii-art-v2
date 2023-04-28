@@ -1,4 +1,4 @@
-import settings from '../settings.json';
+import settings from '../settings/settings.json';
 
 // Utility class to generate the mapping of the light levels for every character
 export class Generate {

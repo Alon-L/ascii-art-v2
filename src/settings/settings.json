@@ -4,5 +4,5 @@
     "height": 8
   },
   "chars": "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§®¯°±©«¬´µ·»¿×÷",
-  "contrastCoefficient": 0
+  "contrastCoefficient": 0.15
 }
