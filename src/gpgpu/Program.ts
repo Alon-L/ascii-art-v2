@@ -12,14 +12,14 @@ export class Program<T extends string> {
     private readonly fg: string;
 
     // The WebGL context instance
-    protected gl: WebGLRenderingContext;
+    protected gl: WebGL2RenderingContext;
 
     protected program: WebGLProgram;
 
     protected readonly frame: Frame;
 
     // An object with all the uniform location objects of the program
-    protected readonly uniformLocations: Record<T, WebGLUniformLocation>;
+    protected readonly uniforms: Record<T, WebGLUniformLocation>;
 
     private readonly posLoc: number;
 
@@ -27,10 +27,10 @@ export class Program<T extends string> {
     protected readonly dstWidth: number;
     protected readonly dstHeight: number;
 
-    protected constructor(vs: string, fg: string, frame: Frame, dstWidth: number, dstHeight: number) {
+    protected constructor(vs: string, fg: string, frame: Frame, dstWidth: number, dstHeight: number, uniformLocs: readonly T[]) {
         const canvas = document.createElement('canvas');
 
-        const gl = canvas.getContext('webgl');
+        const gl = canvas.getContext('webgl2');
         if (!gl) throw new Error('WebGL is not supported on this browser!');
 
         canvas.width = dstWidth;
@@ -67,7 +67,13 @@ export class Program<T extends string> {
         this.posLoc = this.gl.getAttribLocation(this.program, 'position');
 
         // Initialize the uniform locations object
-        this.uniformLocations = {} as Record<T, WebGLUniformLocation>;
+        this.uniforms = uniformLocs.reduce((acc, loc) => {
+            const uniform = this.gl.getUniformLocation(this.program, loc);
+            if (!uniform) throw new Error(`Could not find uniform ${loc}!`);
+
+            acc[loc] = uniform;
+            return acc;
+        }, {} as Record<T, WebGLUniformLocation>)
     }
 
     // Sets up the position attribute and draws the canvas
@@ -159,7 +165,7 @@ export class Program<T extends string> {
         const location = this.gl.getUniformLocation(this.program, loc);
         if (!location) throw new Error('Uniform location not found!');
 
-        this.uniformLocations[loc] = location;
+        this.uniforms[loc] = location;
     }
 
     // Returns the results of the program shader

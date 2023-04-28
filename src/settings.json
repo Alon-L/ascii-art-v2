@@ -3,5 +3,6 @@
     "width": 4,
     "height": 8
   },
-  "chars": "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§®¯°±©«¬´µ·»¿×÷"
+  "chars": "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§®¯°±©«¬´µ·»¿×÷",
+  "contrastCoefficient": 0
 }

@@ -1,7 +1,7 @@
 import './style.css'
 import {CalcProgram} from "./gpgpu/calc/CalcProgram.ts";
 import {Generate} from "./charLights/generate.ts";
-import videoExample from './snoopy.mp4';
+import videoExample from './video_example.mp4';
 import {MonochromeProgram} from "./gpgpu/monochrome/MonochromeProgram.ts";
 
 const mono = new MonochromeProgram({

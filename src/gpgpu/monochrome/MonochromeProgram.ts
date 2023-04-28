@@ -1,14 +1,15 @@
 import {Frame, Program} from "../Program.ts";
 import vs from "./mono.vert";
 import fg from "./mono.frag";
+import settings from '../../settings.json';
 
-export class MonochromeProgram extends Program<'pixelsTex' | 'pixelsDims'> {
+const monoProgramUniforms = ['pixelsTex', 'pixelsDims', 'contrastCoefficient'];
+
+export class MonochromeProgram extends Program<typeof monoProgramUniforms[number]> {
     constructor(frame: Frame) {
-        super(vs, fg, frame, frame.width, frame.height);
+        super(vs, fg, frame, frame.width, frame.height, monoProgramUniforms);
 
-        // Sets the locations of the uniforms
-        this.addUniformLoc('pixelsTex');
-        this.addUniformLoc('pixelsDims');
+        this.gl.uniform1f(this.uniforms['contrastCoefficient'], settings.contrastCoefficient);
     }
 
     public set pixels(pixels: Uint8Array | Uint8ClampedArray) {
@@ -23,6 +24,6 @@ export class MonochromeProgram extends Program<'pixelsTex' | 'pixelsDims'> {
 
     // Creates a texture from the light values of the pixels
     private createPixelsTexture(): void {
-        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.uniformLocations['pixelsTex'], this.uniformLocations['pixelsDims'], this.gl.RGBA);
+        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.uniforms['pixelsTex'], this.uniforms['pixelsDims'], this.gl.RGBA);
     }
 }
