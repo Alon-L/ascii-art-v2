@@ -1,5 +1,4 @@
 import './style.css'
-import {Generator} from "./charLights/generator.ts";
 import videoExample from './video_example.mp4';
 import {Render} from "./render.ts";
 import {Panel} from "./settings/panel.ts";
