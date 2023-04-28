@@ -5,7 +5,7 @@ import {Render} from "./render.ts";
 import {Panel} from "./settings/panel.ts";
 
 const render = new Render(videoExample, { width: window.innerWidth, height: window.innerHeight, fps: 60 });
-const panel = new Panel(render);
+new Panel(render);
 
 /*gui.onChange((event) => {
     if (event.property === 'contrastCoefficient') {
@@ -71,8 +71,6 @@ async function extractFramesFromVideo(fps = 30) {
 }
 
 extractFramesFromVideo();*/
-
-const lightMap = new Generator().generate();
 
 //console.log(JSON.stringify(lightMap));
 
