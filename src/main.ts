@@ -1,7 +1,7 @@
 import './style.css'
 import {CalcProgram} from "./gpgpu/calc/CalcProgram.ts";
-import videoExample from './video_example.mp4';
 import {Generate} from "./charLights/generate.ts";
+import videoExample from './snoopy.mp4';
 import {MonochromeProgram} from "./gpgpu/monochrome/MonochromeProgram.ts";
 
 const mono = new MonochromeProgram({
@@ -41,7 +41,7 @@ async function extractFramesFromVideo(fps = 30) {
     const duration = video.duration;
 
     const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
     const [w, h] = [window.innerWidth, window.innerHeight];
     canvas.width = w;
     canvas.height = h;
