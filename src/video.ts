@@ -37,6 +37,13 @@ export class Video {
         this.ctx = ctx;
     }
 
+    // Stops the video and deletes its element and the canvas element
+    public stop(): void {
+        this.video.pause();
+        this.video.remove();
+        this.ctx.canvas.remove();
+    }
+
     // Draws the current frame onto a canvas and reads the pixels into the readable stream
     private onFrame(): void {
         const {width, height} = this.settings;

@@ -61,6 +61,13 @@ export class Render {
             .replace(this.rowRegexp, '$1\n');
     }
 
+    // Stops the video, destroys the stream and clears the span
+    public stop(): void {
+        this.video.stop();
+        this.frames.destroy();
+        this.resultSpan.innerText = '';
+    }
+
     public set fps(value: number) {
         this.video.fps = value;
     }
