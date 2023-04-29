@@ -1,211 +1,211 @@
 // Represents a frame of the image.
 export type Frame = {
-    pixels: Uint8Array | Uint8ClampedArray;
-    width: number;
-    height: number;
+  pixels: Uint8Array | Uint8ClampedArray;
+  width: number;
+  height: number;
 };
 
 // Interface for a WebGL program
 export class Program<T extends string> {
-    // String contents of the vertex and fragment shaders
-    private readonly vs: string;
-    private readonly fg: string;
+  // String contents of the vertex and fragment shaders
+  private readonly vs: string;
 
-    private readonly canvas: HTMLCanvasElement;
+  private readonly fg: string;
 
-    // The WebGL context instance
-    protected readonly gl: WebGL2RenderingContext;
+  private readonly canvas: HTMLCanvasElement;
 
-    protected readonly program: WebGLProgram;
+  // The WebGL context instance
+  protected readonly gl: WebGL2RenderingContext;
 
-    protected readonly frame: Frame;
+  protected readonly program: WebGLProgram;
 
-    // An object with all the uniform location objects of the program
-    protected readonly uniforms: Record<T, WebGLUniformLocation>;
+  protected readonly frame: Frame;
 
-    private readonly posLoc: number;
+  // An object with all the uniform location objects of the program
+  protected readonly uniforms: Record<T, WebGLUniformLocation>;
 
-    // The width and height of the resulting calculations' matrix.
-    protected _dstWidth: number;
-    protected _dstHeight: number;
+  private readonly posLoc: number;
 
-    protected constructor(vs: string, fg: string, frame: Frame, dstWidth: number, dstHeight: number, uniformLocs: readonly T[]) {
-        this.canvas = document.createElement('canvas');
-        this.canvas.width = dstWidth;
-        this.canvas.height = dstHeight;
+  // The width and height of the resulting calculations' matrix.
+  protected _dstWidth: number;
 
-        const gl = this.canvas.getContext('webgl2');
-        if (!gl) throw new Error('WebGL is not supported on this browser!');
+  protected _dstHeight: number;
 
-        this.gl = gl;
-        this.vs = vs;
-        this.fg = fg;
-        this._dstWidth = dstWidth;
-        this._dstHeight = dstHeight;
+  protected constructor(
+    vs: string,
+    fg: string,
+    frame: Frame,
+    dstWidth: number,
+    dstHeight: number,
+    uniformLocs: readonly T[],
+  ) {
+    this.canvas = document.createElement('canvas');
+    this.canvas.width = dstWidth;
+    this.canvas.height = dstHeight;
 
-        this.frame = frame;
+    const gl = this.canvas.getContext('webgl2');
+    if (!gl) throw new Error('WebGL is not supported on this browser!');
 
-        // Loads the shaders
-        const vsShader = this.loadShader(this.gl.VERTEX_SHADER, this.vs);
-        const fgShader = this.loadShader(this.gl.FRAGMENT_SHADER, this.fg);
+    this.gl = gl;
+    this.vs = vs;
+    this.fg = fg;
+    this._dstWidth = dstWidth;
+    this._dstHeight = dstHeight;
 
-        const program = this.gl.createProgram();
-        if (!program) throw new Error('Could not create webgl program!');
+    this.frame = frame;
 
-        // Adds the shaders to the program and links it
-        this.gl.attachShader(program, vsShader);
-        this.gl.attachShader(program, fgShader);
-        this.gl.linkProgram(program);
+    // Loads the shaders
+    const vsShader = this.loadShader(this.gl.VERTEX_SHADER, this.vs);
+    const fgShader = this.loadShader(this.gl.FRAGMENT_SHADER, this.fg);
 
-        // Tell webgl how to convert from clip space to pixels
-        this.setViewport();
+    const program = this.gl.createProgram();
+    if (!program) throw new Error('Could not create webgl program!');
 
-        this.program = program;
+    // Adds the shaders to the program and links it
+    this.gl.attachShader(program, vsShader);
+    this.gl.attachShader(program, fgShader);
+    this.gl.linkProgram(program);
 
-        this.gl.useProgram(this.program);
+    // Tell webgl how to convert from clip space to pixels
+    this.setViewport();
 
-        // Sets the position attribute of the shader
-        this.posLoc = this.gl.getAttribLocation(this.program, 'position');
+    this.program = program;
 
-        // Initialize the uniform locations object
-        this.uniforms = uniformLocs.reduce((acc, loc) => {
-            const uniform = this.gl.getUniformLocation(this.program, loc);
-            if (!uniform) throw new Error(`Could not find uniform ${loc}!`);
+    this.gl.useProgram(this.program);
 
-            acc[loc] = uniform;
-            return acc;
-        }, {} as Record<T, WebGLUniformLocation>);
+    // Sets the position attribute of the shader
+    this.posLoc = this.gl.getAttribLocation(this.program, 'position');
 
-        // Create the position attribute
-        this.createPositionAttr();
+    // Initialize the uniform locations object
+    this.uniforms = uniformLocs.reduce((acc, loc) => {
+      const uniform = this.gl.getUniformLocation(this.program, loc);
+      if (!uniform) throw new Error(`Could not find uniform ${loc}!`);
+
+      acc[loc] = uniform;
+      return acc;
+    }, {} as Record<T, WebGLUniformLocation>);
+
+    // Create the position attribute
+    this.createPositionAttr();
+  }
+
+  // Sets up the position attribute and draws the canvas
+  protected draw(): void {
+    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+  }
+
+  // Creates a new shader and compiles it
+  private loadShader(type: number, src: string): WebGLShader {
+    const shader = this.gl.createShader(type);
+    if (!shader) throw new Error(`Could not load shader of type ${type}!`);
+
+    // Sends the source to the shader object
+    this.gl.shaderSource(shader, src);
+    // Compiles the shader program
+    this.gl.compileShader(shader);
+
+    // Check whether the shader compiled successfully
+    if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+      // this.gl.deleteShader(shader);
+      throw new Error(`An error occurred compiling the shaders: ${this.gl.getShaderInfoLog(shader)}`);
     }
 
-    // Sets up the position attribute and draws the canvas
-    protected draw(): void {
-        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+    return shader;
+  }
+
+  // Creates a new shader texture from the given source array
+  protected createTexture(
+    src: Uint8Array | Uint8ClampedArray,
+    width: number,
+    height: number,
+    unit: number,
+    texLoc: WebGLUniformLocation,
+    texDimsLoc: WebGLUniformLocation,
+    format: GLint,
+  ): void {
+    const tex = this.gl.createTexture();
+    if (!tex) throw new Error('Could not create texture!');
+
+    this.gl.activeTexture(this.gl.TEXTURE0 + unit); // Texture unit 0
+    this.gl.bindTexture(this.gl.TEXTURE_2D, tex);
+    this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 1);
+    // Create a texture from the frame pixel lights
+    this.gl.texImage2D(this.gl.TEXTURE_2D, 0, format, width, height, 0, format, this.gl.UNSIGNED_BYTE, src);
+
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+    // Clamp texture to the edges
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+
+    // Sets the texture uniform and its dimensions uniform
+    this.gl.uniform1i(texLoc, unit); // The src texture is on the given texture unit
+    this.gl.uniform2f(texDimsLoc, width, height);
+  }
+
+  // Creates the attribute for the vertices position, made from 2 triangles
+  protected createPositionAttr(): void {
+    const buffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+    // Position vertices should be 2 triangles that fill the entire canvas
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array([
+        // First triangle, left half of the canvas
+        -1, -1, 1, -1, -1, 1,
+        // Second triangle, right half of the canvas
+        -1, 1, 1, -1, 1, 1,
+      ]),
+      this.gl.STATIC_DRAW,
+    );
+
+    this.gl.enableVertexAttribArray(this.posLoc);
+    this.gl.vertexAttribPointer(this.posLoc, 2, this.gl.FLOAT, false, 0, 0);
+  }
+
+  public set dstWidth(value: number) {
+    this.canvas.width = value;
+    this._dstWidth = value;
+    this.setViewport();
+  }
+
+  public set dstHeight(value: number) {
+    this.canvas.height = value;
+    this._dstHeight = value;
+    this.setViewport();
+  }
+
+  // Adds a new uniform location to the uniform locations object
+  protected addUniformLoc(loc: T): void {
+    const location = this.gl.getUniformLocation(this.program, loc);
+    if (!location) throw new Error('Uniform location not found!');
+
+    this.uniforms[loc] = location;
+  }
+
+  // Returns the results of the program shader
+  public get results(): Uint8Array {
+    const results = new Uint8Array(this._dstWidth * this._dstHeight * 4);
+    this.gl.readPixels(0, 0, this._dstWidth, this._dstHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, results);
+
+    return results;
+  }
+
+  // Returns the R channels of the results
+  public get reducedResults(): Uint8Array {
+    const { results } = this;
+
+    const reduced = new Uint8Array(this._dstWidth * this._dstHeight);
+    // The results are stored in the alpha R channel of every pixel in the canvas
+    for (let i = 0; i < this._dstWidth * this._dstHeight; ++i) {
+      reduced[i] = results[i * 4];
     }
 
-    // Creates a new shader and compiles it
-    private loadShader(type: number, src: string): WebGLShader {
-        const shader = this.gl.createShader(type);
-        if (!shader) throw new Error(`Could not load shader of type ${type}!`);
+    return reduced;
+  }
 
-        // Sends the source to the shader object
-        this.gl.shaderSource(shader, src);
-        // Compiles the shader program
-        this.gl.compileShader(shader);
-
-        // Check whether the shader compiled successfully
-        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            //this.gl.deleteShader(shader);
-            throw new Error(`An error occurred compiling the shaders: ${this.gl.getShaderInfoLog(shader)}`);
-        }
-
-        return shader;
-    }
-
-    // Creates a new shader texture from the given source array
-    protected createTexture(src: Uint8Array | Uint8ClampedArray, width: number, height: number, unit: number, texLoc: WebGLUniformLocation, texDimsLoc: WebGLUniformLocation, format: GLint): void {
-        const tex = this.gl.createTexture();
-        if (!tex) throw new Error('Could not create texture!');
-
-        this.gl.activeTexture(this.gl.TEXTURE0 + unit); // Texture unit 0
-        this.gl.bindTexture(this.gl.TEXTURE_2D, tex);
-        this.gl.pixelStorei(this.gl.UNPACK_ALIGNMENT, 1);
-        // Create a texture from the frame pixel lights
-        this.gl.texImage2D(
-            this.gl.TEXTURE_2D,
-            0,
-            format,
-            width,
-            height,
-            0,
-            format,
-            this.gl.UNSIGNED_BYTE,
-            src,
-        );
-
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-        // Clamp texture to the edges
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-
-        // Sets the texture uniform and its dimensions uniform
-        this.gl.uniform1i(texLoc, unit); // The src texture is on the given texture unit
-        this.gl.uniform2f(texDimsLoc, width, height);
-    }
-
-    // Creates the attribute for the vertices position, made from 2 triangles
-    protected createPositionAttr(): void {
-        const buffer = this.gl.createBuffer();
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-        // Position vertices should be 2 triangles that fill the entire canvas
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array([
-            // First triangle, left half of the canvas
-            -1, -1,
-            1, -1,
-            -1, 1,
-            // Second triangle, right half of the canvas
-            -1, 1,
-            1, -1,
-            1, 1,
-        ]), this.gl.STATIC_DRAW);
-
-        this.gl.enableVertexAttribArray(this.posLoc);
-        this.gl.vertexAttribPointer(
-            this.posLoc,
-            2,
-            this.gl.FLOAT,
-            false,
-            0,
-            0,
-        );
-    }
-
-    public set dstWidth(value: number) {
-        this.canvas.width = value;
-        this._dstWidth = value;
-        this.setViewport();
-    }
-
-    public set dstHeight(value: number) {
-        this.canvas.height = value;
-        this._dstHeight = value;
-        this.setViewport();
-    }
-
-    // Adds a new uniform location to the uniform locations object
-    protected addUniformLoc(loc: T): void {
-        const location = this.gl.getUniformLocation(this.program, loc);
-        if (!location) throw new Error('Uniform location not found!');
-
-        this.uniforms[loc] = location;
-    }
-
-    // Returns the results of the program shader
-    public get results(): Uint8Array {
-        const results = new Uint8Array(this._dstWidth * this._dstHeight * 4);
-        this.gl.readPixels(0, 0, this._dstWidth, this._dstHeight, this.gl.RGBA, this.gl.UNSIGNED_BYTE, results);
-
-        return results;
-    }
-
-    // Returns the R channels of the results
-    public get reducedResults(): Uint8Array {
-        const results = this.results;
-
-        const reduced = new Uint8Array(this._dstWidth * this._dstHeight);
-        // The results are stored in the alpha R channel of every pixel in the canvas
-        for (let i = 0; i < this._dstWidth * this._dstHeight; ++i) {
-            reduced[i] = results[i * 4];
-        }
-
-        return reduced;
-    }
-
-    // Tells webgl how to convert from clip space to pixels
-    private setViewport(): void {
-        this.gl.viewport(0, 0, this._dstWidth, this._dstHeight);
-    }
+  // Tells webgl how to convert from clip space to pixels
+  private setViewport(): void {
+    this.gl.viewport(0, 0, this._dstWidth, this._dstHeight);
+  }
 }

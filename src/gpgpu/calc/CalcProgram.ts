@@ -1,84 +1,108 @@
-import {Frame, Program} from '../Program.ts';
+import { Frame, Program } from '../Program.ts';
 import vs from './calc.vert';
 import fg from './calc.frag';
-import {RenderSettings} from "../../render.ts";
+import { RenderSettings } from '../../render.ts';
 
-const calcProgramUniforms = ['lightsTex'
-    , 'lightsDims'
-    , 'charLightsTex'
-    , 'charLightsDims'
-    , 'blockWidth',
-    'blockHeight'
-    , 'charNum'] as const;
+const calcProgramUniforms = [
+  'lightsTex',
+  'lightsDims',
+  'charLightsTex',
+  'charLightsDims',
+  'blockWidth',
+  'blockHeight',
+  'charNum',
+] as const;
 
-export class CalcProgram extends Program<typeof calcProgramUniforms[number]> {
-    // Settings are linked to the lil gui. Changes dynamically
-    private renderSettings: RenderSettings;
-    private lightMap: number[];
+export class CalcProgram extends Program<(typeof calcProgramUniforms)[number]> {
+  // Settings are linked to the lil gui. Changes dynamically
+  private renderSettings: RenderSettings;
 
-    public constructor(frame: Frame, renderSettings: RenderSettings, lightMap: number[]) {
-        const { block: { width: blockWidth, height: blockHeight } } = renderSettings;
+  private lightMap: number[];
 
-        const dstWidth = frame.width / blockWidth;
-        const dstHeight = frame.height / blockHeight;
+  public constructor(frame: Frame, renderSettings: RenderSettings, lightMap: number[]) {
+    const {
+      block: { width: blockWidth, height: blockHeight },
+    } = renderSettings;
 
-        super(vs, fg, frame, dstWidth, dstHeight, calcProgramUniforms);
+    const dstWidth = frame.width / blockWidth;
+    const dstHeight = frame.height / blockHeight;
 
-        this.renderSettings = renderSettings;
-        this.lightMap = lightMap;
+    super(vs, fg, frame, dstWidth, dstHeight, calcProgramUniforms);
 
-        // Initialize the uniforms
-        this.gl.uniform1i(this.uniforms.blockWidth, this.renderSettings.block.width);
-        this.gl.uniform1i(this.uniforms.blockHeight, this.renderSettings.block.height);
-        this.gl.uniform1i(this.uniforms.charNum, this.renderSettings.chars.length);
+    this.renderSettings = renderSettings;
+    this.lightMap = lightMap;
 
-        // Creates the texture from the characters light map
-        this.createCharLightsTexture();
-    }
+    // Initialize the uniforms
+    this.gl.uniform1i(this.uniforms.blockWidth, this.renderSettings.block.width);
+    this.gl.uniform1i(this.uniforms.blockHeight, this.renderSettings.block.height);
+    this.gl.uniform1i(this.uniforms.charNum, this.renderSettings.chars.length);
 
-    public set blockWidth(value: number) {
-        this.dstWidth = this.frame.width / value;
+    // Creates the texture from the characters light map
+    this.createCharLightsTexture();
+  }
 
-        this.gl.uniform1i(this.uniforms.blockWidth, value);
-    }
+  public set blockWidth(value: number) {
+    this.dstWidth = this.frame.width / value;
 
-    public set blockHeight(value: number) {
-        this.dstHeight = this.frame.height / value;
+    this.gl.uniform1i(this.uniforms.blockWidth, value);
+  }
 
-        this.gl.uniform1i(this.uniforms.blockHeight, value);
-    }
+  public set blockHeight(value: number) {
+    this.dstHeight = this.frame.height / value;
 
-    public set chars(value: string) {
-        this.gl.uniform1i(this.uniforms.charNum, value.length);
-    }
+    this.gl.uniform1i(this.uniforms.blockHeight, value);
+  }
 
-    public set charLights(lightMap: number[]) {
-        this.lightMap = lightMap;
-        this.createCharLightsTexture();
-    }
+  public set chars(value: string) {
+    this.gl.uniform1i(this.uniforms.charNum, value.length);
+  }
 
-    // Sets-up all the attributes, uniforms and textures, and draws the canvas
-    public draw(): void {
-        this.createLightsTexture();
-        super.draw();
-    }
+  public set charLights(lightMap: number[]) {
+    this.lightMap = lightMap;
+    this.createCharLightsTexture();
+  }
 
-    public set lights(lights: Uint8Array) {
-        this.frame.pixels = lights;
-        this.createCharLightsTexture();
-    }
+  // Sets-up all the attributes, uniforms and textures, and draws the canvas
+  public draw(): void {
+    this.createLightsTexture();
+    super.draw();
+  }
 
-    private createCharLightsTexture(): void {
-        const { chars, block: { width: blockWidth, height: blockHeight} } = this.renderSettings;
+  public set lights(lights: Uint8Array) {
+    this.frame.pixels = lights;
+    this.createCharLightsTexture();
+  }
 
-        const width = blockWidth * blockHeight + 1;
-        const height = chars.length;
+  private createCharLightsTexture(): void {
+    const {
+      chars,
+      block: { width: blockWidth, height: blockHeight },
+    } = this.renderSettings;
 
-        this.createTexture(new Uint8Array(this.lightMap), width, height, 1, this.uniforms.charLightsTex, this.uniforms.charLightsDims, this.gl.LUMINANCE);
-    }
+    const width = blockWidth * blockHeight + 1;
+    const height = chars.length;
 
-    // Creates a texture from the light values of the pixels
-    private createLightsTexture(): void {
-        this.createTexture(this.frame.pixels, this.frame.width, this.frame.height, 0, this.uniforms.lightsTex, this.uniforms.lightsDims, this.gl.LUMINANCE);
-    }
+    this.createTexture(
+      new Uint8Array(this.lightMap),
+      width,
+      height,
+      1,
+      this.uniforms.charLightsTex,
+      this.uniforms.charLightsDims,
+      this.gl.LUMINANCE,
+    );
+  }
+
+  // Creates a texture from the light values of the pixels
+  private createLightsTexture(): void {
+    this.createTexture(
+      this.frame.pixels,
+      this.frame.width,
+      this.frame.height,
+      0,
+      this.uniforms.lightsTex,
+      this.uniforms.lightsDims,
+      this.gl.LUMINANCE,
+    );
+  }
 }
