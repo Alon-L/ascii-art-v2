@@ -5,6 +5,7 @@
   font-family: 'Roboto Mono', monospace;
   background-color: black;
   color: white;
+  margin: 0;
 }
 
 #stop-btn {
