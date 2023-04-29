@@ -62,7 +62,8 @@ export class Generator {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.font = `normal ${this.width}pt 'Roboto Mono', monospace`;
+    // TODO: Make the font customizable
+    ctx.font = `normal ${this.width}pt 'Source Code Pro', monospace`;
     ctx.fillStyle = 'white';
 
     // Center text horizontally and vertically
