@@ -50,7 +50,7 @@ export class Video {
 
         setTimeout(() => {
             this.onFrame();
-        }, 1 / (this.settings.fps || settings.fps));
+        }, 1000 / (this.settings.fps || settings.fps));
     }
 
     // Sets the fps value

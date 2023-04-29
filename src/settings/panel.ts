@@ -36,7 +36,7 @@ export class Panel {
 
         this.gui.add(settings, 'chars').name('Characters');
         this.gui.add(settings, 'contrastCoefficient', -1, 1).name('Contrast Coefficient');
-        this.gui.add(settings, 'fps', 15, 75).name('FPS');
+        this.gui.add(settings, 'fps', 5, 100).name('FPS');
 
         this.gui.onChange(this.onChange.bind(this));
     }

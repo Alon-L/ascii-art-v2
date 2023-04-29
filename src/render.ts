@@ -57,7 +57,8 @@ export class Render {
         this.calcProgram.draw();
 
         // Turns the resulting ascii codes into a string
-        this.resultSpan.innerText = String.fromCharCode(...this.calcProgram.reducedResults).replace(this.rowRegexp, '$1\n');
+        this.resultSpan.innerText = String.fromCharCode(...this.calcProgram.reducedResults)
+            .replace(this.rowRegexp, '$1\n');
     }
 
     public set fps(value: number) {
@@ -70,15 +71,15 @@ export class Render {
 
     public set blockWidth(value: number) {
         this.rowRegexp = this.createRowRegexp(value);
-        this.generator.width = value;
         this.generateLightMap();
+        this.generator.width = value;
         this.calcProgram.blockWidth = value;
     }
 
     public set blockHeight(value: number) {
         this.generator.height = value;
-        this.calcProgram.blockHeight = value;
         this.generateLightMap();
+        this.calcProgram.blockHeight = value;
         this.setFontSize(value);
     }
 

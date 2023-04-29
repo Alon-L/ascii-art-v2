@@ -76,8 +76,6 @@ export class Generator {
 
         ctx.fillText(char, canvas.width / 2, canvas.height / 2);
 
-        document.querySelector('#app')!.appendChild(canvas);
-
         return ctx;
     }
 }
