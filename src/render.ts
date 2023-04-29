@@ -5,10 +5,13 @@ import {Video, VideoSettings} from "./video.ts";
 import {Generator} from "./charLights/generator.ts";
 import settings from './settings/settings.json';
 
+export type RenderSettings = typeof settings;
+
 // Renders the ascii video.
 // Uses the Video class to render the original video, and pipes its frames into the readable stream.
 // Uses the mono and calc programs to turn the frame into ascii, and renders the characters onto the span
 export class Render {
+    private readonly settings: RenderSettings;
     private readonly video: Video;
     private readonly frames: Readable;
     private readonly monoProgram: MonoProgram;
@@ -17,9 +20,10 @@ export class Render {
     private readonly resultSpan: HTMLSpanElement;
     private rowRegexp: RegExp;
 
-    public constructor(src: string, videoSettings: VideoSettings) {
+    public constructor(src: string, videoSettings: VideoSettings, renderSettings: RenderSettings, lightMap: number[]) {
         const {width, height} = videoSettings;
 
+        this.settings = renderSettings;
         this.frames = new Readable({ read(_size: number) {} });
 
         this.monoProgram = new MonoProgram({
@@ -32,7 +36,7 @@ export class Render {
             pixels: new Uint8Array(),
             width,
             height,
-        });
+        }, renderSettings, lightMap);
 
         this.generator = new Generator();
 
@@ -41,7 +45,7 @@ export class Render {
         this.video = new Video(src, this.frames, videoSettings);
 
         this.resultSpan = document.querySelector('#result')!;
-        this.setFontSize(settings.block.height);
+        this.setFontSize(settings.block.width);
 
         this.rowRegexp = this.createRowRegexp(settings.block.width);
     }
@@ -78,20 +82,20 @@ export class Render {
 
     public set blockWidth(value: number) {
         this.rowRegexp = this.createRowRegexp(value);
-        this.generateLightMap();
         this.generator.width = value;
+        this.generateLightMap();
         this.calcProgram.blockWidth = value;
+        this.setFontSize(value);
     }
 
     public set blockHeight(value: number) {
         this.generator.height = value;
         this.generateLightMap();
         this.calcProgram.blockHeight = value;
-        this.setFontSize(value);
     }
 
     public set chars(value: string) {
-        this.calcProgram.charNum = value.length;
+        this.calcProgram.chars = value;
         this.generateLightMap(value);
     }
 
@@ -104,8 +108,8 @@ export class Render {
         this.calcProgram.charLights = this.generator.generate();
     }
 
-    private setFontSize(blockHeight: number): void {
-        this.resultSpan.style.fontSize = `${Math.min(blockHeight - 2, 6)}px`;
+    private setFontSize(blockWidth: number): void {
+        this.resultSpan.style.fontSize = `${blockWidth}pt`;
     }
 
     private createRowRegexp(blockWidth: number): RegExp {

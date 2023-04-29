@@ -58,7 +58,7 @@ export class Program<T extends string> {
         this.gl.linkProgram(program);
 
         // Tell webgl how to convert from clip space to pixels
-        this.gl.viewport(0, 0, dstWidth, dstHeight);
+        this.setViewport();
 
         this.program = program;
 
@@ -166,11 +166,13 @@ export class Program<T extends string> {
     public set dstWidth(value: number) {
         this.canvas.width = value;
         this._dstWidth = value;
+        this.setViewport();
     }
 
     public set dstHeight(value: number) {
         this.canvas.height = value;
         this._dstHeight = value;
+        this.setViewport();
     }
 
     // Adds a new uniform location to the uniform locations object
@@ -200,5 +202,10 @@ export class Program<T extends string> {
         }
 
         return reduced;
+    }
+
+    // Tells webgl how to convert from clip space to pixels
+    private setViewport(): void {
+        this.gl.viewport(0, 0, this._dstWidth, this._dstHeight);
     }
 }

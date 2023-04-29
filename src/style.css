@@ -1,11 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
 #result {
   word-break: break-all;
+  font-family: 'Roboto Mono', monospace;
+  background-color: black;
+  color: white;
+}
+
+#stop-btn {
   position: absolute;
   top: 0;
   left: 0;
-  font-family: monospace;
-  background-color: black;
-  color: white;
 }
 
 /*

@@ -1,8 +1,7 @@
 import {Frame, Program} from '../Program.ts';
 import vs from './calc.vert';
 import fg from './calc.frag';
-import charLights from '../../charLights/map.json';
-import settings from '../../settings/settings.json';
+import {RenderSettings} from "../../render.ts";
 
 const calcProgramUniforms = ['lightsTex'
     , 'lightsDims'
@@ -13,26 +12,25 @@ const calcProgramUniforms = ['lightsTex'
     , 'charNum'] as const;
 
 export class CalcProgram extends Program<typeof calcProgramUniforms[number]> {
-    private _blockWidth: number;
-    private _blockHeight: number;
-    private _charNum: number;
-    private _lightMap: number[];
+    // Settings are linked to the lil gui. Changes dynamically
+    private renderSettings: RenderSettings;
+    private lightMap: number[];
 
-    public constructor(frame: Frame, blockWidth = settings.block.width, blockHeight = settings.block.height, charNum = settings.chars.length, lightMap = charLights) {
+    public constructor(frame: Frame, renderSettings: RenderSettings, lightMap: number[]) {
+        const { block: { width: blockWidth, height: blockHeight } } = renderSettings;
+
         const dstWidth = frame.width / blockWidth;
         const dstHeight = frame.height / blockHeight;
 
         super(vs, fg, frame, dstWidth, dstHeight, calcProgramUniforms);
 
-        this._blockWidth = blockWidth;
-        this._blockHeight = blockHeight;
-        this._charNum = charNum;
-        this._lightMap = lightMap;
+        this.renderSettings = renderSettings;
+        this.lightMap = lightMap;
 
         // Initialize the uniforms
-        this.blockWidth = settings.block.width;
-        this.blockHeight = settings.block.height;
-        this.charNum = settings.chars.length;
+        this.gl.uniform1i(this.uniforms.blockWidth, this.renderSettings.block.width);
+        this.gl.uniform1i(this.uniforms.blockHeight, this.renderSettings.block.height);
+        this.gl.uniform1i(this.uniforms.charNum, this.renderSettings.chars.length);
 
         // Creates the texture from the characters light map
         this.createCharLightsTexture();
@@ -40,26 +38,22 @@ export class CalcProgram extends Program<typeof calcProgramUniforms[number]> {
 
     public set blockWidth(value: number) {
         this.dstWidth = this.frame.width / value;
-        this._blockWidth = value;
 
         this.gl.uniform1i(this.uniforms.blockWidth, value);
     }
 
     public set blockHeight(value: number) {
         this.dstHeight = this.frame.height / value;
-        this._blockHeight = value;
 
         this.gl.uniform1i(this.uniforms.blockHeight, value);
     }
 
-    public set charNum(value: number) {
-        this._charNum = value;
-
-        this.gl.uniform1i(this.uniforms.charNum, value);
+    public set chars(value: string) {
+        this.gl.uniform1i(this.uniforms.charNum, value.length);
     }
 
     public set charLights(lightMap: number[]) {
-        this._lightMap = lightMap;
+        this.lightMap = lightMap;
         this.createCharLightsTexture();
     }
 
@@ -75,10 +69,12 @@ export class CalcProgram extends Program<typeof calcProgramUniforms[number]> {
     }
 
     private createCharLightsTexture(): void {
-        const width = this._blockWidth * this._blockHeight + 1;
-        const height = this._charNum;
+        const { chars, block: { width: blockWidth, height: blockHeight} } = this.renderSettings;
 
-        this.createTexture(new Uint8Array(this._lightMap), width, height, 1, this.uniforms.charLightsTex, this.uniforms.charLightsDims, this.gl.LUMINANCE);
+        const width = blockWidth * blockHeight + 1;
+        const height = chars.length;
+
+        this.createTexture(new Uint8Array(this.lightMap), width, height, 1, this.uniforms.charLightsTex, this.uniforms.charLightsDims, this.gl.LUMINANCE);
     }
 
     // Creates a texture from the light values of the pixels

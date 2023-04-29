@@ -61,7 +61,7 @@ export class Generator {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.font = `normal ${this.height}px monospace`;
+        ctx.font = `normal ${this.width}pt 'Roboto Mono', monospace`;
         ctx.fillStyle = 'white';
 
         // Center text horizontally and vertically
@@ -75,6 +75,8 @@ export class Generator {
         ctx.shadowBlur = 3;
 
         ctx.fillText(char, canvas.width / 2, canvas.height / 2);
+
+        canvas.remove();
 
         return ctx;
     }
