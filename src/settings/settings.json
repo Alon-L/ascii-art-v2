@@ -5,5 +5,5 @@
   },
   "chars": "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^`abcdefghijklmnopqrstuvwxyz{|}~¡¢£¤¥¦§®¯°±©«¬´µ·»¿×÷",
   "contrastCoefficient": 0.1,
-  "fps": 30
+  "fps": 60
 }

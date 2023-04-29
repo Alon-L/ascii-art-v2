@@ -11,7 +11,7 @@ export type RenderSettings = typeof settings;
 // Uses the Video class to render the original video, and pipes its frames into the readable stream.
 // Uses the mono and calc programs to turn the frame into ascii, and renders the characters onto the span
 export class Render {
-  private readonly settings: RenderSettings;
+  // private readonly settings: RenderSettings;
 
   private readonly video: Video;
 
@@ -23,14 +23,14 @@ export class Render {
 
   private readonly generator: Generator;
 
-  private readonly resultSpan: HTMLSpanElement;
+  private readonly resultEle: HTMLSpanElement;
 
   private rowRegexp: RegExp;
 
   public constructor(src: string, videoSettings: VideoSettings, renderSettings: RenderSettings, lightMap: number[]) {
     const { width, height } = videoSettings;
 
-    this.settings = renderSettings;
+    // this.settings = renderSettings;
     this.frames = new Readable({
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       read() {},
@@ -60,11 +60,11 @@ export class Render {
 
     const resultSpan = document.querySelector<HTMLSpanElement>('#result');
     if (!resultSpan) throw new Error('Could not find result span!');
-    this.resultSpan = resultSpan;
-
-    this.setFontSize(settings.block.width);
+    this.resultEle = resultSpan;
 
     this.rowRegexp = this.createRowRegexp(settings.block.width);
+
+    this.setFontSize(settings.block.width);
   }
 
   // Called with every frame of the video
@@ -78,14 +78,14 @@ export class Render {
     this.calcProgram.draw();
 
     // Turns the resulting ascii codes into a string
-    this.resultSpan.innerText = String.fromCharCode(...this.calcProgram.reducedResults).replace(this.rowRegexp, '$1\n');
+    this.resultEle.innerText = String.fromCharCode(...this.calcProgram.reducedResults).replace(this.rowRegexp, '$1\n');
   }
 
   // Stops the video, destroys the stream and clears the span
   public stop(): void {
     this.video.stop();
     this.frames.destroy();
-    this.resultSpan.innerText = '';
+    this.resultEle.innerText = '';
   }
 
   public set fps(value: number) {
@@ -124,11 +124,23 @@ export class Render {
     this.calcProgram.charLights = this.generator.generate();
   }
 
+  // Sets the font size of the result element and sets its corresponding letter spacing to fit to width
   private setFontSize(blockWidth: number): void {
-    this.resultSpan.style.fontSize = `${blockWidth}pt`;
+    this.resultEle.style.fontSize = `${blockWidth}pt`;
+    this.resultEle.style.letterSpacing = 'normal';
+
+    // Fills the result ele with a long string, while breaking it using the regex
+    this.resultEle.innerText = '-'.repeat(this.video.settings.width).replace(this.rowRegexp, '$1\n');
+    const eleWidth = this.resultEle.getBoundingClientRect().width;
+    const rowLetterNum = this.video.settings.width / blockWidth;
+
+    // letterSpacing = (desiredWidth - actualWidth) / rowLetterNum
+    const letterSpacing = (this.video.settings.width - eleWidth) / rowLetterNum;
+
+    this.resultEle.style.letterSpacing = `${letterSpacing}px`;
   }
 
   private createRowRegexp(blockWidth: number): RegExp {
-    return new RegExp(`(.{${this.video.settings.width / blockWidth}})`, 'g');
+    return new RegExp(`(.{${Math.floor(this.video.settings.width / blockWidth)}})`, 'g');
   }
 }

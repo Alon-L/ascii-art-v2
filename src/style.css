@@ -1,8 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
 
-#result {
-  word-break: break-all;
-  font-family: 'Roboto Mono', monospace;
+pre {
+  font-family: 'Source Code Pro', monospace;
   background-color: black;
   color: white;
   margin: 0;
@@ -50,8 +49,7 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  overflow: hidden;
 }
 
 h1 {
