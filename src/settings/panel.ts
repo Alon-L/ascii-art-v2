@@ -32,23 +32,27 @@ type GUIEvent = {
 // The GUI panel for the website settings
 // Applies the settings onto the shader uniforms, and regenerates the char maps if needed
 export class Panel {
-  private readonly render: Render;
+  private _render: Render | undefined;
 
   private readonly gui: GUI;
 
   private readonly blockFolder: GUI;
 
-  constructor(render: Render) {
-    this.render = render;
+  constructor(render?: Render) {
+    this._render = render;
     this.gui = new GUI();
 
     this.blockFolder = this.gui.addFolder('Block');
-    this.blockFolder.add(settings.block, 'width', 2, 100).name('Width');
-    this.blockFolder.add(settings.block, 'height', 4, 100).name('Height');
+    this.blockFolder.add(settings.block, 'width', 2, 32, 1).name('Width');
+    this.blockFolder.add(settings.block, 'height', 4, 32, 1).name('Height');
 
     this.gui.add(settings, 'chars').name('Characters');
     this.gui.add(settings, 'contrastCoefficient', -1, 1).name('Contrast Coefficient');
     this.gui.add(settings, 'fps', 5, 100).name('FPS');
+  }
+
+  public set render(render: Render) {
+    this._render = render;
   }
 
   public bindChange(): void {
@@ -60,22 +64,23 @@ export class Panel {
 
   private onChange(event: GUIEvent): void {
     const { property, value } = event;
+    if (!this._render) return;
 
     switch (property) {
       case GUIProperties.FPS:
-        this.render.fps = value;
+        this._render.fps = value;
         break;
       case GUIProperties.CONTRAST_COEFFICIENT:
-        this.render.contrastCoefficient = value;
+        this._render.contrastCoefficient = value;
         break;
       case GUIProperties.BLOCK_WIDTH:
-        this.render.blockWidth = value;
+        this._render.blockWidth = value;
         break;
       case GUIProperties.BLOCK_HEIGHT:
-        this.render.blockHeight = value;
+        this._render.blockHeight = value;
         break;
       case GUIProperties.CHARS:
-        this.render.chars = value;
+        this._render.chars = value;
         break;
       default:
         break;
