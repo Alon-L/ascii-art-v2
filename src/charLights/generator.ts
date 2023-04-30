@@ -74,7 +74,7 @@ export class Generator {
     ctx.shadowColor = 'white';
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 3;
+    ctx.shadowBlur = this.width / 2;
 
     ctx.fillText(char, canvas.width / 2, canvas.height / 2);
 
