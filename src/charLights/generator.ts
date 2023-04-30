@@ -2,6 +2,8 @@ import settings from '../settings/settings.json';
 
 // Utility class to generate the mapping of the light levels for every character
 export class Generator {
+  private readonly ctx: CanvasRenderingContext2D;
+
   // A string that contains all the available characters for usage
   public chars: string;
 
@@ -10,6 +12,11 @@ export class Generator {
   public height: number;
 
   constructor(chars = settings.chars, width = settings.block.width, height = settings.block.height) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) throw new Error('Canvas is not supported on this browser!');
+    this.ctx = ctx;
+
     this.chars = chars;
 
     this.width = width;
@@ -18,6 +25,9 @@ export class Generator {
 
   // Generates a map in the format of the 'charLights' float array, from all the available characters
   public generate(): number[] {
+    this.ctx.canvas.width = this.width;
+    this.ctx.canvas.height = this.height;
+
     let result: number[] = [];
 
     // for (const char of this.chars) {
@@ -36,7 +46,7 @@ export class Generator {
 
   // Returns the light map of a character.
   private lightMap(char: string): number[] {
-    const ctx = this.createCanvas(char);
+    const ctx = this.initCanvas(char);
     const pixels = ctx.getImageData(0, 0, this.width, this.height).data;
 
     // Take only the R channel, since the text is monochrome.
@@ -50,17 +60,11 @@ export class Generator {
 
   // Creates a canvas element and writes the character into it.
   // The character is written in white, at a size that matches the constant block size.
-  private createCanvas(char: string): CanvasRenderingContext2D {
-    const canvas = document.createElement('canvas');
-    canvas.width = this.width;
-    canvas.height = this.height;
-
-    const ctx = canvas.getContext('2d');
-
-    if (!ctx) throw new Error('Canvas is not supported on this browser!');
+  private initCanvas(char: string): CanvasRenderingContext2D {
+    const { ctx } = this;
 
     ctx.fillStyle = 'black';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     // TODO: Make the font customizable
     ctx.font = `normal ${this.width}pt 'Source Code Pro', monospace`;
@@ -76,9 +80,7 @@ export class Generator {
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = this.width / 2;
 
-    ctx.fillText(char, canvas.width / 2, canvas.height / 2);
-
-    canvas.remove();
+    ctx.fillText(char, ctx.canvas.width / 2, ctx.canvas.height / 2);
 
     return ctx;
   }
