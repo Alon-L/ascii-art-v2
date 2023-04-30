@@ -84,6 +84,8 @@ export class Render {
   // Stops the video, destroys the stream and clears the span
   public stop(): void {
     this.video.stop();
+    this.calcProgram.destroy();
+    this.monoProgram.destroy();
     this.frames.destroy();
     this.resultEle.innerText = '';
   }

@@ -33,4 +33,7 @@ input?.addEventListener('change', () => {
 
 // Initialize the stop button
 const btn = document.getElementById('stop-btn');
-btn?.addEventListener('click', () => render?.stop());
+btn?.addEventListener('click', () => {
+  render?.stop();
+  render = undefined;
+});
