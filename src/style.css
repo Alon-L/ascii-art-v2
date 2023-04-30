@@ -5,16 +5,28 @@ pre {
   background-color: black;
   color: white;
   margin: 0;
+  z-index: 1;
 }
 
 #stop-btn {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 2;
 }
 
 #video-input {
   margin: auto;
+}
+
+.github-logo {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.github-logo img {
+  height: 64px;
 }
 
 :root {
@@ -33,12 +45,17 @@ pre {
   -webkit-text-size-adjust: 100%;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  overflow: hidden;
   height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 button {
@@ -52,9 +69,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
