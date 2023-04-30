@@ -8,6 +8,8 @@ export type VideoSettings = {
 
 // Reads the frames of the video and pipes it into a readable stream
 export class Video {
+  private isStopped = false;
+
   private readonly video: HTMLVideoElement;
 
   private readonly ctx: CanvasRenderingContext2D;
@@ -40,6 +42,7 @@ export class Video {
 
   // Stops the video and deletes its element and the canvas element
   public stop(): void {
+    this.isStopped = true;
     this.video.pause();
     this.video.remove();
     this.ctx.canvas.remove();
@@ -47,6 +50,8 @@ export class Video {
 
   // Draws the current frame onto a canvas and reads the pixels into the readable stream
   private onFrame(): void {
+    if (this.isStopped) return;
+
     const { width, height } = this.settings;
 
     // Draw the image

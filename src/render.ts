@@ -13,7 +13,7 @@ export type RenderSettings = typeof settings;
 export class Render {
   // private readonly settings: RenderSettings;
 
-  private readonly video: Video;
+  private video: Video;
 
   private readonly frames: Readable;
 
@@ -84,10 +84,14 @@ export class Render {
   // Stops the video, destroys the stream and clears the span
   public stop(): void {
     this.video.stop();
-    this.calcProgram.destroy();
-    this.monoProgram.destroy();
-    this.frames.destroy();
+    // Empties the buffer of the frames stream
+    this.frames.read(this.frames.readableLength);
     this.resultEle.innerText = '';
+  }
+
+  public set src(src: string) {
+    this.stop();
+    this.video = new Video(src, this.frames, this.video.settings);
   }
 
   public set fps(value: number) {

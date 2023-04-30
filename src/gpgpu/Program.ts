@@ -89,12 +89,6 @@ export class Program<T extends string> {
     this.createPositionAttr();
   }
 
-  // Stops the program
-  public destroy(): void {
-    this.gl.deleteProgram(this.program);
-    this.canvas.remove();
-  }
-
   // Sets up the position attribute and draws the canvas
   protected draw(): void {
     this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
