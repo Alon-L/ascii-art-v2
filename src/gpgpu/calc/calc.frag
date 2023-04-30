@@ -45,7 +45,7 @@ void main() {
         // Compare with the previous checked letters
         if (abs(delta) < abs(bestCharDelta)) {
             bestCharDelta = delta;
-            bestCharASCII = texture(charLightsTex, vec2(0, i) / charLightsDims);
+            bestCharASCII = texture(charLightsTex, vec2(0, i + 1) / charLightsDims);
         }
     }
 
